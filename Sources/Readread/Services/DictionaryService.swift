@@ -154,13 +154,21 @@ class DictionaryService {
             }
             
             // Clean percent encoding (%20 -> space) and HTML entities
-            var cleanedMatch = match.removingPercentEncoding ?? match
+            let rawMatch = match.replacingOccurrences(of: "% ", with: "%")
+            var cleanedMatch = rawMatch.removingPercentEncoding ?? rawMatch
             cleanedMatch = cleanedMatch.replacingOccurrences(of: "%20", with: " ")
             cleanedMatch = cleanedMatch.replacingOccurrences(of: "&quot;", with: "\"")
             cleanedMatch = cleanedMatch.replacingOccurrences(of: "&#39;", with: "'")
             cleanedMatch = cleanedMatch.replacingOccurrences(of: "&amp;", with: "&")
             
-            resultText = cleanedMatch.trimmingCharacters(in: .whitespacesAndNewlines)
+            let finalStr = cleanedMatch.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Discard if the result contains raw percent encoding artifacts (e.g. %D0, %81)
+            if finalStr.contains("%") {
+                return
+            }
+            
+            resultText = finalStr
         }.resume()
         
         _ = semaphore.wait(timeout: .now() + 2.5)

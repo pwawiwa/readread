@@ -423,5 +423,48 @@
   ],
   "very": [
     "sangat"
+  ],
+  "backward": [
+    "ke belakang",
+    "terbelakang",
+    "mundur"
+  ],
+  "backwards": [
+    "ke belakang",
+    "mundur"
+  ],
+  "forward": [
+    "ke depan",
+    "maju"
+  ],
+  "forwards": [
+    "ke depan",
+    "maju"
+  ],
+  "towards": [
+    "menuju",
+    "terhadap"
+  ],
+  "downward": [
+    "ke bawah"
+  ],
+  "upward": [
+    "ke atas"
+  ],
+  "doubt": [
+    "keraguan",
+    "ragu",
+    "meragukan"
+  ],
+  "doubting": [
+    "meragukan",
+    "ragu"
+  ],
+  "doubtful": [
+    "ragu-ragu",
+    "meragukan"
+  ],
+  "doubts": [
+    "keraguan-keraguan"
   ]
 }
