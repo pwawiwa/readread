@@ -270,6 +270,7 @@
   ],
   "love": [
     "cinta",
+    "mencintai",
     "kasih"
   ],
   "hate": [
@@ -466,5 +467,961 @@
   ],
   "doubts": [
     "keraguan-keraguan"
+  ],
+  "ask": [
+    "bertanya",
+    "meminta",
+    "memohon"
+  ],
+  "asking": [
+    "bertanya",
+    "meminta",
+    "memohon"
+  ],
+  "asked": [
+    "bertanya",
+    "meminta"
+  ],
+  "think": [
+    "berpikir",
+    "mengira",
+    "menganggap"
+  ],
+  "thinking": [
+    "berpikir",
+    "pemikiran"
+  ],
+  "thought": [
+    "pemikiran",
+    "pikiran",
+    "berpikir"
+  ],
+  "say": [
+    "mengatakan",
+    "berkata",
+    "ucap"
+  ],
+  "saying": [
+    "mengatakan",
+    "pepatah"
+  ],
+  "said": [
+    "dikatakan",
+    "berkata"
+  ],
+  "see": [
+    "melihat",
+    "memahami",
+    "menemui"
+  ],
+  "seeing": [
+    "melihat"
+  ],
+  "saw": [
+    "melihat",
+    "gergaji"
+  ],
+  "seen": [
+    "terlihat",
+    "dilihat"
+  ],
+  "know": [
+    "tahu",
+    "mengetahui",
+    "mengenal"
+  ],
+  "knowing": [
+    "mengetahui"
+  ],
+  "knew": [
+    "tahu",
+    "mengetahui"
+  ],
+  "known": [
+    "dikenal",
+    "diketahui"
+  ],
+  "get": [
+    "mendapatkan",
+    "memperoleh",
+    "menjadi"
+  ],
+  "getting": [
+    "mendapatkan"
+  ],
+  "got": [
+    "mendapat"
+  ],
+  "go": [
+    "pergi",
+    "jalan"
+  ],
+  "going": [
+    "pergi",
+    "akan"
+  ],
+  "went": [
+    "pergi"
+  ],
+  "gone": [
+    "pergi",
+    "hilang"
+  ],
+  "make": [
+    "membuat",
+    "menjadikan"
+  ],
+  "making": [
+    "membuat"
+  ],
+  "made": [
+    "dibuat",
+    "membuat"
+  ],
+  "can": [
+    "dapat",
+    "bisa",
+    "kaleng"
+  ],
+  "could": [
+    "bisa",
+    "dapat"
+  ],
+  "will": [
+    "akan",
+    "kehendak"
+  ],
+  "would": [
+    "akan"
+  ],
+  "should": [
+    "harus",
+    "seharusnya"
+  ],
+  "must": [
+    "harus",
+    "wajib"
+  ],
+  "may": [
+    "mungkin",
+    "boleh"
+  ],
+  "might": [
+    "mungkin"
+  ],
+  "take": [
+    "mengambil",
+    "membawa",
+    "memerlukan"
+  ],
+  "taking": [
+    "mengambil"
+  ],
+  "took": [
+    "mengambil"
+  ],
+  "taken": [
+    "diambil"
+  ],
+  "come": [
+    "datang",
+    "tiba"
+  ],
+  "coming": [
+    "datang"
+  ],
+  "came": [
+    "datang"
+  ],
+  "want": [
+    "ingin",
+    "menginginkan",
+    "mau"
+  ],
+  "wanting": [
+    "ingin"
+  ],
+  "wanted": [
+    "diinginkan"
+  ],
+  "use": [
+    "menggunakan",
+    "memakai",
+    "kegunaan"
+  ],
+  "using": [
+    "menggunakan"
+  ],
+  "used": [
+    "digunakan",
+    "terbiasa"
+  ],
+  "find": [
+    "menemukan",
+    "mencari"
+  ],
+  "finding": [
+    "temuan",
+    "menemukan"
+  ],
+  "found": [
+    "ditemukan"
+  ],
+  "give": [
+    "memberikan",
+    "memberi"
+  ],
+  "giving": [
+    "memberikan"
+  ],
+  "gave": [
+    "memberi"
+  ],
+  "given": [
+    "diberikan"
+  ],
+  "tell": [
+    "memberitahu",
+    "menceritakan"
+  ],
+  "telling": [
+    "memberitahu"
+  ],
+  "told": [
+    "diberitahu"
+  ],
+  "work": [
+    "bekerja",
+    "pekerjaan",
+    "karya"
+  ],
+  "working": [
+    "bekerja"
+  ],
+  "worked": [
+    "bekerja"
+  ],
+  "call": [
+    "memanggil",
+    "menelepon",
+    "panggilan"
+  ],
+  "calling": [
+    "memanggil"
+  ],
+  "called": [
+    "dipanggil",
+    "dinamakan"
+  ],
+  "try": [
+    "mencoba",
+    "usaha"
+  ],
+  "trying": [
+    "mencoba"
+  ],
+  "tried": [
+    "mencoba"
+  ],
+  "need": [
+    "membutuhkan",
+    "keperluan"
+  ],
+  "needing": [
+    "membutuhkan"
+  ],
+  "needed": [
+    "dibutuhkan"
+  ],
+  "feel": [
+    "merasakan",
+    "merasa",
+    "perasaan"
+  ],
+  "feeling": [
+    "perasaan",
+    "merasakan"
+  ],
+  "felt": [
+    "merasa"
+  ],
+  "become": [
+    "menjadi"
+  ],
+  "becoming": [
+    "menjadi"
+  ],
+  "became": [
+    "menjadi"
+  ],
+  "leave": [
+    "meninggalkan",
+    "pergi",
+    "izin"
+  ],
+  "leaving": [
+    "meninggalkan"
+  ],
+  "left": [
+    "kiri",
+    "meninggalkan"
+  ],
+  "put": [
+    "meletakkan",
+    "menaruh"
+  ],
+  "putting": [
+    "meletakkan"
+  ],
+  "mean": [
+    "berarti",
+    "maksud",
+    "jahat"
+  ],
+  "meaning": [
+    "arti",
+    "makna"
+  ],
+  "meant": [
+    "dimaksudkan"
+  ],
+  "keep": [
+    "menjaga",
+    "menyimpan",
+    "tetap"
+  ],
+  "keeping": [
+    "menjaga"
+  ],
+  "kept": [
+    "disimpan",
+    "menjaga"
+  ],
+  "let": [
+    "membiarkan",
+    "sewa"
+  ],
+  "letting": [
+    "membiarkan"
+  ],
+  "begin": [
+    "memulai",
+    "mulai"
+  ],
+  "beginning": [
+    "awal",
+    "permulaan"
+  ],
+  "began": [
+    "mulai"
+  ],
+  "begun": [
+    "dimulai"
+  ],
+  "seem": [
+    "tampak",
+    "kelihatan"
+  ],
+  "seeming": [
+    "tampak"
+  ],
+  "seemed": [
+    "tampak"
+  ],
+  "help": [
+    "membantu",
+    "bantuan",
+    "pertolongan"
+  ],
+  "helping": [
+    "membantu"
+  ],
+  "helped": [
+    "dibantu"
+  ],
+  "talk": [
+    "bicara",
+    "berbicara",
+    "obrolan"
+  ],
+  "talking": [
+    "berbicara"
+  ],
+  "talked": [
+    "berbicara"
+  ],
+  "turn": [
+    "gif",
+    "berbelok",
+    "memutar",
+    "giliran"
+  ],
+  "turning": [
+    "memutar"
+  ],
+  "turned": [
+    "berubah",
+    "berbelok"
+  ],
+  "start": [
+    "mulai",
+    "memulai",
+    "awal"
+  ],
+  "starting": [
+    "memulai"
+  ],
+  "started": [
+    "dimulai"
+  ],
+  "show": [
+    "menunjukkan",
+    "tontonan",
+    "pertunjukan"
+  ],
+  "showing": [
+    "menunjukkan"
+  ],
+  "showed": [
+    "menunjukkan"
+  ],
+  "shown": [
+    "ditunjukkan"
+  ],
+  "hear": [
+    "mendengar"
+  ],
+  "hearing": [
+    "pendengaran",
+    "mendengar"
+  ],
+  "heard": [
+    "mendengar"
+  ],
+  "play": [
+    "bermain",
+    "drama",
+    "permainan"
+  ],
+  "playing": [
+    "bermain"
+  ],
+  "played": [
+    "dimainkan"
+  ],
+  "run": [
+    "berlari",
+    "menjalankan",
+    "lari"
+  ],
+  "running": [
+    "berlari",
+    "menjalankan"
+  ],
+  "ran": [
+    "berlari"
+  ],
+  "move": [
+    "pindah",
+    "bergerak",
+    "langkah"
+  ],
+  "moving": [
+    "bergerak"
+  ],
+  "moved": [
+    "pindah"
+  ],
+  "live": [
+    "hidup",
+    "tinggal",
+    "langsung"
+  ],
+  "living": [
+    "kehidupan",
+    "tinggal"
+  ],
+  "lived": [
+    "tinggal"
+  ],
+  "believe": [
+    "percaya",
+    "meyakini"
+  ],
+  "believing": [
+    "percaya"
+  ],
+  "believed": [
+    "dipercayai"
+  ],
+  "bring": [
+    "membawa"
+  ],
+  "bringing": [
+    "membawa"
+  ],
+  "brought": [
+    "membawa"
+  ],
+  "happen": [
+    "terjadi"
+  ],
+  "happening": [
+    "terjadi"
+  ],
+  "happened": [
+    "terjadi"
+  ],
+  "write": [
+    "menulis"
+  ],
+  "writing": [
+    "tulisan",
+    "menulis"
+  ],
+  "wrote": [
+    "menulis"
+  ],
+  "written": [
+    "tertulis"
+  ],
+  "sit": [
+    "duduk"
+  ],
+  "sitting": [
+    "duduk"
+  ],
+  "sat": [
+    "duduk"
+  ],
+  "stand": [
+    "berdiri",
+    "pendirian"
+  ],
+  "standing": [
+    "berdiri"
+  ],
+  "stood": [
+    "berdiri"
+  ],
+  "lose": [
+    "kehilangan",
+    "kalah"
+  ],
+  "losing": [
+    "kehilangan"
+  ],
+  "lost": [
+    "hilang",
+    "kalah"
+  ],
+  "pay": [
+    "membayar",
+    "gaji"
+  ],
+  "paying": [
+    "membayar"
+  ],
+  "paid": [
+    "dibayar"
+  ],
+  "meet": [
+    "bertemu",
+    "rapat"
+  ],
+  "meeting": [
+    "pertemuan",
+    "rapat"
+  ],
+  "met": [
+    "bertemu"
+  ],
+  "include": [
+    "termasuk",
+    "memasukkan"
+  ],
+  "including": [
+    "termasuk"
+  ],
+  "included": [
+    "termasuk"
+  ],
+  "continue": [
+    "melanjutkan",
+    "meneruskan"
+  ],
+  "continuing": [
+    "melanjutkan"
+  ],
+  "continued": [
+    "dilanjutkan"
+  ],
+  "set": [
+    "mengatur",
+    "set",
+    "kumpulan"
+  ],
+  "setting": [
+    "pengaturan",
+    "latar"
+  ],
+  "learn": [
+    "belajar",
+    "mempelajari"
+  ],
+  "learning": [
+    "pembelajaran",
+    "belajar"
+  ],
+  "learned": [
+    "mempelajari"
+  ],
+  "change": [
+    "berubah",
+    "mengubah",
+    "perubahan"
+  ],
+  "changing": [
+    "mengubah"
+  ],
+  "changed": [
+    "berubah"
+  ],
+  "lead": [
+    "memimpin",
+    "petunjuk"
+  ],
+  "leading": [
+    "terkemuka",
+    "memimpin"
+  ],
+  "led": [
+    "dipimpin"
+  ],
+  "understand": [
+    "memahami",
+    "mengerti"
+  ],
+  "understanding": [
+    "pemahaman",
+    "memahami"
+  ],
+  "understood": [
+    "dipahami"
+  ],
+  "watch": [
+    "menonton",
+    "jam tangan",
+    "mengawasi"
+  ],
+  "watching": [
+    "menonton"
+  ],
+  "watched": [
+    "ditonton"
+  ],
+  "follow": [
+    "mengikuti"
+  ],
+  "following": [
+    "berikutnya",
+    "mengikuti"
+  ],
+  "followed": [
+    "diikuti"
+  ],
+  "stop": [
+    "berhenti",
+    "hentikan"
+  ],
+  "stopping": [
+    "berhenti"
+  ],
+  "stopped": [
+    "berhenti"
+  ],
+  "create": [
+    "menciptakan",
+    "membuat"
+  ],
+  "creating": [
+    "menciptakan"
+  ],
+  "created": [
+    "diciptakan"
+  ],
+  "speak": [
+    "berbicara"
+  ],
+  "speaking": [
+    "berbicara"
+  ],
+  "spoke": [
+    "berbicara"
+  ],
+  "spoken": [
+    "diucapkan"
+  ],
+  "read": [
+    "membaca",
+    "bacaan"
+  ],
+  "reading": [
+    "membaca",
+    "bacaan"
+  ],
+  "allow": [
+    "izinkan",
+    "memungkinkan"
+  ],
+  "allowing": [
+    "mengizinkan"
+  ],
+  "allowed": [
+    "diizinkan"
+  ],
+  "add": [
+    "menambahkan",
+    "tambah"
+  ],
+  "adding": [
+    "menambahkan"
+  ],
+  "added": [
+    "ditambahkan"
+  ],
+  "spend": [
+    "menghabiskan"
+  ],
+  "spending": [
+    "pengeluaran",
+    "menghabiskan"
+  ],
+  "spent": [
+    "dihabiskan"
+  ],
+  "grow": [
+    "tumbuh",
+    "berkembang"
+  ],
+  "growing": [
+    "tumbuh"
+  ],
+  "grew": [
+    "tumbuh"
+  ],
+  "grown": [
+    "tumbuh"
+  ],
+  "open": [
+    "buka",
+    "membuka",
+    "terbuka"
+  ],
+  "opening": [
+    "pembukaan",
+    "membuka"
+  ],
+  "opened": [
+    "dibuka"
+  ],
+  "walk": [
+    "berjalan",
+    "jalan kaki"
+  ],
+  "walking": [
+    "berjalan"
+  ],
+  "walked": [
+    "berjalan"
+  ],
+  "win": [
+    "menang",
+    "kemenangan"
+  ],
+  "winning": [
+    "menang"
+  ],
+  "won": [
+    "menang"
+  ],
+  "offer": [
+    "menawarkan",
+    "tawaran"
+  ],
+  "offering": [
+    "penawaran",
+    "menawarkan"
+  ],
+  "offered": [
+    "ditawarkan"
+  ],
+  "remember": [
+    "mengingat",
+    "ingat"
+  ],
+  "remembering": [
+    "mengingat"
+  ],
+  "remembered": [
+    "diingat"
+  ],
+  "loving": [
+    "penuh cinta"
+  ],
+  "loved": [
+    "dicintai"
+  ],
+  "consider": [
+    "mempertimbangkan",
+    "menganggap"
+  ],
+  "considering": [
+    "mengingat",
+    "mempertimbangkan"
+  ],
+  "considered": [
+    "dipertimbangkan"
+  ],
+  "appear": [
+    "muncul",
+    "tampak"
+  ],
+  "appearing": [
+    "muncul"
+  ],
+  "appeared": [
+    "muncul"
+  ],
+  "buy": [
+    "membeli"
+  ],
+  "buying": [
+    "membeli"
+  ],
+  "bought": [
+    "dibeli"
+  ],
+  "wait": [
+    "menunggu"
+  ],
+  "waiting": [
+    "menunggu"
+  ],
+  "waited": [
+    "menunggu"
+  ],
+  "serve": [
+    "melayani",
+    "menyajikan"
+  ],
+  "serving": [
+    "pelayanan",
+    "melayani"
+  ],
+  "served": [
+    "dilayani"
+  ],
+  "die": [
+    "mati",
+    "meninggal"
+  ],
+  "dying": [
+    "sekarat",
+    "meninggal"
+  ],
+  "died": [
+    "meninggal"
+  ],
+  "send": [
+    "mengirim"
+  ],
+  "sending": [
+    "mengirim"
+  ],
+  "sent": [
+    "terkirim",
+    "dikirim"
+  ],
+  "expect": [
+    "berharap",
+    "mengharapkan"
+  ],
+  "expecting": [
+    "mengharapkan"
+  ],
+  "expected": [
+    "diharapkan"
+  ],
+  "build": [
+    "membangun",
+    "bina"
+  ],
+  "building": [
+    "bangunan",
+    "membangun"
+  ],
+  "built": [
+    "dibangun"
+  ],
+  "stay": [
+    "tinggal",
+    "tetap"
+  ],
+  "staying": [
+    "tinggal"
+  ],
+  "stayed": [
+    "tinggal"
+  ],
+  "fall": [
+    "jatuh",
+    "musim gugur"
+  ],
+  "falling": [
+    "jatuh"
+  ],
+  "fell": [
+    "jatuh"
+  ],
+  "fallen": [
+    "jatuh"
+  ],
+  "cut": [
+    "memotong",
+    "potongan"
+  ],
+  "cutting": [
+    "memotong"
+  ],
+  "reach": [
+    "mencapai",
+    "jangkauan"
+  ],
+  "reaching": [
+    "mencapai"
+  ],
+  "reached": [
+    "mencapai"
+  ],
+  "kill": [
+    "membunuh"
+  ],
+  "killing": [
+    "pembunuhan",
+    "membunuh"
+  ],
+  "killed": [
+    "dibunuh"
+  ],
+  "remain": [
+    "tetap",
+    "sisa"
+  ],
+  "remaining": [
+    "tersisa"
+  ],
+  "remained": [
+    "tetap"
   ]
 }

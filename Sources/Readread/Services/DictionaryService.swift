@@ -64,13 +64,26 @@ class DictionaryService {
                 return TranslationResult(word: cleanText, translations: translations, sourceLanguage: source, targetLanguage: target, isSystemDefinition: false)
             }
             
-            // Stemming rules (e.g. doubting -> doubt, treacheries -> treachery)
+            // Stemming rules (e.g. asking -> ask, making -> make, running -> run, doubting -> doubt)
             if source == .english {
                 var stems: [String] = []
-                if lower.hasSuffix("ies") && lower.count > 4 { stems.append(String(lower.dropLast(3)) + "y") }
-                if lower.hasSuffix("ing") && lower.count > 5 { stems.append(String(lower.dropLast(3))) }
-                if lower.hasSuffix("ed") && lower.count > 4 { stems.append(String(lower.dropLast(2))) }
-                if lower.hasSuffix("s") && lower.count > 3 { stems.append(String(lower.dropLast())) }
+                if lower.hasSuffix("ies") && lower.count >= 4 { stems.append(String(lower.dropLast(3)) + "y") }
+                if lower.hasSuffix("ing") && lower.count >= 4 {
+                    let base = String(lower.dropLast(3))
+                    stems.append(base)
+                    stems.append(base + "e")
+                    if base.count >= 2 && base.suffix(1) == String(base.dropLast().suffix(1)) {
+                        stems.append(String(base.dropLast()))
+                    }
+                }
+                if lower.hasSuffix("ed") && lower.count >= 4 {
+                    let base = String(lower.dropLast(2))
+                    stems.append(base)
+                    stems.append(base + "e")
+                }
+                if lower.hasSuffix("s") && lower.count >= 3 {
+                    stems.append(String(lower.dropLast()))
+                }
                 
                 for stem in stems {
                     if let translations = dict[stem] {
