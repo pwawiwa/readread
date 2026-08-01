@@ -150,15 +150,22 @@ struct TranslationPopover: View {
         let cleanText = selectedText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanText.isEmpty else { return }
         
-        // 1. Immediately fetch instant offline result
+        // 1. Fetch instant offline result
+        let offlineResult: DictionaryService.TranslationResult?
         if selectedMode == .define {
-            self.translationResult = dictionaryServiceWrapper.service.define(word: cleanText, language: sourceLanguage)
+            offlineResult = dictionaryServiceWrapper.service.define(word: cleanText, language: sourceLanguage)
         } else {
-            self.translationResult = dictionaryServiceWrapper.service.translate(word: cleanText, from: sourceLanguage, to: targetLanguage, allowOnline: false)
+            offlineResult = dictionaryServiceWrapper.service.translate(word: cleanText, from: sourceLanguage, to: targetLanguage, allowOnline: false)
         }
         
-        // 2. Fetch full sentence online translation in background
-        if selectedMode == .translate {
+        self.translationResult = offlineResult
+        
+        // 2. Only query online API if offline dictionary found no valid match OR if it's a multi-word sentence
+        let hasOfflineMatch = offlineResult != nil && !(offlineResult?.translations.first?.contains("Tidak ada terjemahan") ?? true) && !(offlineResult?.translations.first?.contains("No translation found") ?? true)
+        
+        let isMultiWord = cleanText.contains(" ")
+        
+        if selectedMode == .translate && (!hasOfflineMatch || isMultiWord) {
             self.isLoading = true
             let currentSource = sourceLanguage
             let currentTarget = targetLanguage
@@ -167,11 +174,16 @@ struct TranslationPopover: View {
                 let fullResult = dictionaryServiceWrapper.service.translate(word: cleanText, from: currentSource, to: currentTarget, allowOnline: true)
                 DispatchQueue.main.async {
                     if let fullResult = fullResult {
-                        self.translationResult = fullResult
+                        let validOnline = !(fullResult.translations.first?.lowercased() == cleanText.lowercased())
+                        if validOnline || !hasOfflineMatch {
+                            self.translationResult = fullResult
+                        }
                     }
                     self.isLoading = false
                 }
             }
+        } else {
+            self.isLoading = false
         }
     }
     

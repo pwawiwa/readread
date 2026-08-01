@@ -57,20 +57,20 @@ class DictionaryService {
             return TranslationResult(word: cleanText, translations: cached, sourceLanguage: source, targetLanguage: target, isSystemDefinition: false)
         }
         
-        // 2. Single word direct lookup in local dictionary
+        // 2. Local Dictionary & Stemming Lookup (Single Words)
         if !isMultiWord {
             let lower = cleanText.lowercased()
             if let translations = dict[lower] {
                 return TranslationResult(word: cleanText, translations: translations, sourceLanguage: source, targetLanguage: target, isSystemDefinition: false)
             }
             
-            // Stemming rules
+            // Stemming rules (e.g. doubting -> doubt, treacheries -> treachery)
             if source == .english {
                 var stems: [String] = []
                 if lower.hasSuffix("ies") && lower.count > 4 { stems.append(String(lower.dropLast(3)) + "y") }
-                if lower.hasSuffix("s") && lower.count > 3 { stems.append(String(lower.dropLast())) }
-                if lower.hasSuffix("ed") && lower.count > 4 { stems.append(String(lower.dropLast(2))) }
                 if lower.hasSuffix("ing") && lower.count > 5 { stems.append(String(lower.dropLast(3))) }
+                if lower.hasSuffix("ed") && lower.count > 4 { stems.append(String(lower.dropLast(2))) }
+                if lower.hasSuffix("s") && lower.count > 3 { stems.append(String(lower.dropLast())) }
                 
                 for stem in stems {
                     if let translations = dict[stem] {
@@ -82,9 +82,12 @@ class DictionaryService {
         
         // 3. Multi-word sentence or missing word: query Online Sentence Translation Engine (if allowed)
         if allowOnline, let onlineSentenceTranslation = fetchOnlineTranslation(word: cleanText, from: source, to: target) {
-            let result = capitalizeFirst(onlineSentenceTranslation)
-            dynamicCache[langKey] = [result]
-            return TranslationResult(word: cleanText, translations: [result], sourceLanguage: source, targetLanguage: target, isSystemDefinition: false)
+            // Discard online result if it returned the exact same input word
+            if onlineSentenceTranslation.lowercased() != cleanText.lowercased() {
+                let result = capitalizeFirst(onlineSentenceTranslation)
+                dynamicCache[langKey] = [result]
+                return TranslationResult(word: cleanText, translations: [result], sourceLanguage: source, targetLanguage: target, isSystemDefinition: false)
+            }
         }
         
         // 4. Offline multi-word fallback: translate individual words and stitch together
@@ -128,7 +131,6 @@ class DictionaryService {
         let srcCode = source == .english ? "en" : "id"
         let tgtCode = target == .indonesian ? "id" : "en"
         
-        // Custom character set encoding to prevent URL query parameter breakage
         let allowed = CharacterSet.urlQueryAllowed.subtracting(CharacterSet(charactersIn: "&+=?#"))
         guard let encodedWord = word.addingPercentEncoding(withAllowedCharacters: allowed),
               let url = URL(string: "https://api.mymemory.translated.net/get?q=\(encodedWord)&langpair=\(srcCode)|\(tgtCode)") else {
