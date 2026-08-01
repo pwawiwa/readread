@@ -1,0 +1,503 @@
+{
+  "anak perempuan": [
+    "daughter",
+    "girl"
+  ],
+  "putri": [
+    "daughter"
+  ],
+  "anak-anak perempuan": [
+    "daughters"
+  ],
+  "putri-putri": [
+    "daughters"
+  ],
+  "anak laki-laki": [
+    "son",
+    "boy"
+  ],
+  "putra": [
+    "son"
+  ],
+  "anak-anak laki-laki": [
+    "sons"
+  ],
+  "putra-putra": [
+    "sons"
+  ],
+  "ayah": [
+    "father"
+  ],
+  "bapak": [
+    "father"
+  ],
+  "ibu": [
+    "mother"
+  ],
+  "bunda": [
+    "mother"
+  ],
+  "orang tua": [
+    "parents",
+    "parent"
+  ],
+  "saudara laki-laki": [
+    "brother"
+  ],
+  "kakak/adik laki-laki": [
+    "brother"
+  ],
+  "saudara-saudara laki-laki": [
+    "brothers"
+  ],
+  "saudara perempuan": [
+    "sister"
+  ],
+  "kakak/adik perempuan": [
+    "sister"
+  ],
+  "saudara-saudara perempuan": [
+    "sisters"
+  ],
+  "paman": [
+    "uncle"
+  ],
+  "om": [
+    "uncle"
+  ],
+  "bibi": [
+    "aunt"
+  ],
+  "tante": [
+    "aunt"
+  ],
+  "sepupu": [
+    "cousin"
+  ],
+  "keponakan laki-laki": [
+    "nephew"
+  ],
+  "keponakan perempuan": [
+    "niece"
+  ],
+  "kakek": [
+    "grandfather"
+  ],
+  "nenek": [
+    "grandmother"
+  ],
+  "cucu laki-laki": [
+    "grandson"
+  ],
+  "cucu perempuan": [
+    "granddaughter"
+  ],
+  "suami": [
+    "husband"
+  ],
+  "istri": [
+    "wife"
+  ],
+  "anak": [
+    "child"
+  ],
+  "anak-anak": [
+    "children"
+  ],
+  "keluarga": [
+    "family"
+  ],
+  "keluarga-keluarga": [
+    "families"
+  ],
+  "teman": [
+    "friend"
+  ],
+  "sahabat": [
+    "friend"
+  ],
+  "teman-teman": [
+    "friends"
+  ],
+  "musuh": [
+    "enemy"
+  ],
+  "lawan": [
+    "enemy"
+  ],
+  "musuh-musuh": [
+    "enemies"
+  ],
+  "pria": [
+    "man"
+  ],
+  "laki-laki": [
+    "man"
+  ],
+  "manusia": [
+    "man"
+  ],
+  "pria-pria": [
+    "men"
+  ],
+  "orang-orang": [
+    "men"
+  ],
+  "wanita": [
+    "woman"
+  ],
+  "perempuan": [
+    "woman"
+  ],
+  "wanita-wanita": [
+    "women"
+  ],
+  "gadis": [
+    "girl"
+  ],
+  "raja": [
+    "king"
+  ],
+  "raja-raja": [
+    "kings"
+  ],
+  "ratu": [
+    "queen"
+  ],
+  "ratu-ratu": [
+    "queens"
+  ],
+  "pangeran": [
+    "prince"
+  ],
+  "pangeran-pangeran": [
+    "princes"
+  ],
+  "putri pangeran": [
+    "princess"
+  ],
+  "tuan putri": [
+    "princess"
+  ],
+  "tuan": [
+    "lord",
+    "master"
+  ],
+  "penguasa": [
+    "lord",
+    "ruler"
+  ],
+  "nyonya": [
+    "lady"
+  ],
+  "wanita terhormat": [
+    "lady"
+  ],
+  "majikan": [
+    "master"
+  ],
+  "menguasai": [
+    "master"
+  ],
+  "pelayan": [
+    "servant"
+  ],
+  "hamba": [
+    "servant"
+  ],
+  "pelayan-pelayan": [
+    "servants"
+  ],
+  "pemimpin": [
+    "ruler"
+  ],
+  "penguasa-penguasa": [
+    "rulers"
+  ],
+  "kaisar": [
+    "emperor"
+  ],
+  "kekaisaran": [
+    "empire"
+  ],
+  "kerajaan": [
+    "kingdom"
+  ],
+  "negara": [
+    "state",
+    "country"
+  ],
+  "keadaan": [
+    "state"
+  ],
+  "negara-negara": [
+    "states"
+  ],
+  "pemerintah": [
+    "government"
+  ],
+  "kekuasaan": [
+    "power"
+  ],
+  "kekuatan": [
+    "power"
+  ],
+  "perang": [
+    "war"
+  ],
+  "perdamaian": [
+    "peace"
+  ],
+  "tentara": [
+    "army",
+    "soldier"
+  ],
+  "pasukan": [
+    "army"
+  ],
+  "prajurit": [
+    "soldier"
+  ],
+  "prajurit-prajurit": [
+    "soldiers"
+  ],
+  "pertempuran": [
+    "battle"
+  ],
+  "kemenangan": [
+    "victory"
+  ],
+  "pengkhianatan": [
+    "treachery"
+  ],
+  "kelicikan": [
+    "treachery"
+  ],
+  "pengkhianatan-pengkhianatan": [
+    "treacheries"
+  ],
+  "kebajikan": [
+    "virtue"
+  ],
+  "kebaikan": [
+    "virtue"
+  ],
+  "keberuntungan": [
+    "fortune"
+  ],
+  "nasib": [
+    "fortune",
+    "fate"
+  ],
+  "takdir": [
+    "fate",
+    "destiny"
+  ],
+  "tujuan hidup": [
+    "destiny"
+  ],
+  "kebijaksanaan": [
+    "wisdom"
+  ],
+  "keberanian": [
+    "courage"
+  ],
+  "ketakutan": [
+    "fear"
+  ],
+  "takut": [
+    "fear"
+  ],
+  "kemuliaan": [
+    "glory"
+  ],
+  "kejayaan": [
+    "glory"
+  ],
+  "kehormatan": [
+    "honor"
+  ],
+  "kebenaran": [
+    "truth"
+  ],
+  "keadilan": [
+    "justice"
+  ],
+  "cinta": [
+    "love"
+  ],
+  "kasih": [
+    "love"
+  ],
+  "benci": [
+    "hate"
+  ],
+  "harapan": [
+    "hope"
+  ],
+  "hidup": [
+    "life"
+  ],
+  "kehidupan": [
+    "life"
+  ],
+  "kematian": [
+    "death"
+  ],
+  "maut": [
+    "death"
+  ],
+  "rumah": [
+    "house",
+    "home"
+  ],
+  "tempat tinggal": [
+    "home"
+  ],
+  "kota": [
+    "city"
+  ],
+  "negeri": [
+    "country"
+  ],
+  "tanah": [
+    "land",
+    "earth"
+  ],
+  "daratan": [
+    "land"
+  ],
+  "air": [
+    "water"
+  ],
+  "api": [
+    "fire"
+  ],
+  "bumi": [
+    "earth"
+  ],
+  "udara": [
+    "air"
+  ],
+  "matahari": [
+    "sun"
+  ],
+  "bulan": [
+    "moon"
+  ],
+  "bintang": [
+    "star"
+  ],
+  "langit": [
+    "sky"
+  ],
+  "laut": [
+    "sea"
+  ],
+  "sungai": [
+    "river"
+  ],
+  "gunung": [
+    "mountain"
+  ],
+  "pohon": [
+    "tree"
+  ],
+  "buku": [
+    "book"
+  ],
+  "kitab": [
+    "book"
+  ],
+  "halaman": [
+    "page"
+  ],
+  "kata": [
+    "word"
+  ],
+  "waktu": [
+    "time"
+  ],
+  "tahun": [
+    "year"
+  ],
+  "hari": [
+    "day"
+  ],
+  "malam": [
+    "night"
+  ],
+  "baik": [
+    "good"
+  ],
+  "bagus": [
+    "good"
+  ],
+  "buruk": [
+    "bad"
+  ],
+  "jahat": [
+    "bad"
+  ],
+  "besar": [
+    "great"
+  ],
+  "agung": [
+    "great"
+  ],
+  "kecil": [
+    "small"
+  ],
+  "panjang": [
+    "long"
+  ],
+  "lama": [
+    "long",
+    "old"
+  ],
+  "pendek": [
+    "short"
+  ],
+  "baru": [
+    "new"
+  ],
+  "tua": [
+    "old"
+  ],
+  "muda": [
+    "young"
+  ],
+  "pertama": [
+    "first"
+  ],
+  "terakhir": [
+    "last"
+  ],
+  "sama": [
+    "same"
+  ],
+  "berbeda": [
+    "different"
+  ],
+  "lain": [
+    "other"
+  ],
+  "yang lain": [
+    "another"
+  ],
+  "seperti itu": [
+    "such"
+  ],
+  "demikian": [
+    "such"
+  ],
+  "sendiri": [
+    "own"
+  ],
+  "memiliki": [
+    "own"
+  ],
+  "sangat": [
+    "very"
+  ]
+}

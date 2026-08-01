@@ -1,0 +1,427 @@
+{
+  "daughter": [
+    "anak perempuan",
+    "putri"
+  ],
+  "daughters": [
+    "anak-anak perempuan",
+    "putri-putri"
+  ],
+  "son": [
+    "anak laki-laki",
+    "putra"
+  ],
+  "sons": [
+    "anak-anak laki-laki",
+    "putra-putra"
+  ],
+  "father": [
+    "ayah",
+    "bapak"
+  ],
+  "mother": [
+    "ibu",
+    "bunda"
+  ],
+  "parents": [
+    "orang tua"
+  ],
+  "parent": [
+    "orang tua"
+  ],
+  "brother": [
+    "saudara laki-laki",
+    "kakak/adik laki-laki"
+  ],
+  "brothers": [
+    "saudara-saudara laki-laki"
+  ],
+  "sister": [
+    "saudara perempuan",
+    "kakak/adik perempuan"
+  ],
+  "sisters": [
+    "saudara-saudara perempuan"
+  ],
+  "uncle": [
+    "paman",
+    "om"
+  ],
+  "aunt": [
+    "bibi",
+    "tante"
+  ],
+  "cousin": [
+    "sepupu"
+  ],
+  "nephew": [
+    "keponakan laki-laki"
+  ],
+  "niece": [
+    "keponakan perempuan"
+  ],
+  "grandfather": [
+    "kakek"
+  ],
+  "grandmother": [
+    "nenek"
+  ],
+  "grandson": [
+    "cucu laki-laki"
+  ],
+  "granddaughter": [
+    "cucu perempuan"
+  ],
+  "husband": [
+    "suami"
+  ],
+  "wife": [
+    "istri"
+  ],
+  "child": [
+    "anak"
+  ],
+  "children": [
+    "anak-anak"
+  ],
+  "family": [
+    "keluarga"
+  ],
+  "families": [
+    "keluarga-keluarga"
+  ],
+  "friend": [
+    "teman",
+    "sahabat"
+  ],
+  "friends": [
+    "teman-teman"
+  ],
+  "enemy": [
+    "musuh",
+    "lawan"
+  ],
+  "enemies": [
+    "musuh-musuh"
+  ],
+  "man": [
+    "pria",
+    "laki-laki",
+    "manusia"
+  ],
+  "men": [
+    "pria-pria",
+    "orang-orang"
+  ],
+  "woman": [
+    "wanita",
+    "perempuan"
+  ],
+  "women": [
+    "wanita-wanita"
+  ],
+  "boy": [
+    "anak laki-laki"
+  ],
+  "girl": [
+    "anak perempuan",
+    "gadis"
+  ],
+  "king": [
+    "raja"
+  ],
+  "kings": [
+    "raja-raja"
+  ],
+  "queen": [
+    "ratu"
+  ],
+  "queens": [
+    "ratu-ratu"
+  ],
+  "prince": [
+    "pangeran"
+  ],
+  "princes": [
+    "pangeran-pangeran"
+  ],
+  "princess": [
+    "putri pangeran",
+    "tuan putri"
+  ],
+  "lord": [
+    "tuan",
+    "penguasa"
+  ],
+  "lady": [
+    "nyonya",
+    "wanita terhormat"
+  ],
+  "master": [
+    "majikan",
+    "tuan",
+    "menguasai"
+  ],
+  "servant": [
+    "pelayan",
+    "hamba"
+  ],
+  "servants": [
+    "pelayan-pelayan"
+  ],
+  "ruler": [
+    "penguasa",
+    "pemimpin"
+  ],
+  "rulers": [
+    "penguasa-penguasa"
+  ],
+  "emperor": [
+    "kaisar"
+  ],
+  "empire": [
+    "kekaisaran"
+  ],
+  "kingdom": [
+    "kerajaan"
+  ],
+  "state": [
+    "negara",
+    "keadaan"
+  ],
+  "states": [
+    "negara-negara"
+  ],
+  "government": [
+    "pemerintah"
+  ],
+  "power": [
+    "kekuasaan",
+    "kekuatan"
+  ],
+  "war": [
+    "perang"
+  ],
+  "peace": [
+    "perdamaian"
+  ],
+  "army": [
+    "tentara",
+    "pasukan"
+  ],
+  "soldier": [
+    "prajurit",
+    "tentara"
+  ],
+  "soldiers": [
+    "prajurit-prajurit"
+  ],
+  "battle": [
+    "pertempuran"
+  ],
+  "victory": [
+    "kemenangan"
+  ],
+  "treachery": [
+    "pengkhianatan",
+    "kelicikan"
+  ],
+  "treacheries": [
+    "pengkhianatan-pengkhianatan"
+  ],
+  "virtue": [
+    "kebajikan",
+    "kebaikan"
+  ],
+  "fortune": [
+    "keberuntungan",
+    "nasib"
+  ],
+  "fate": [
+    "takdir",
+    "nasib"
+  ],
+  "destiny": [
+    "takdir",
+    "tujuan hidup"
+  ],
+  "wisdom": [
+    "kebijaksanaan"
+  ],
+  "courage": [
+    "keberanian"
+  ],
+  "fear": [
+    "ketakutan",
+    "takut"
+  ],
+  "glory": [
+    "kemuliaan",
+    "kejayaan"
+  ],
+  "honor": [
+    "kehormatan"
+  ],
+  "truth": [
+    "kebenaran"
+  ],
+  "justice": [
+    "keadilan"
+  ],
+  "love": [
+    "cinta",
+    "kasih"
+  ],
+  "hate": [
+    "benci"
+  ],
+  "hope": [
+    "harapan"
+  ],
+  "life": [
+    "hidup",
+    "kehidupan"
+  ],
+  "death": [
+    "kematian",
+    "maut"
+  ],
+  "house": [
+    "rumah"
+  ],
+  "home": [
+    "rumah",
+    "tempat tinggal"
+  ],
+  "city": [
+    "kota"
+  ],
+  "country": [
+    "negara",
+    "negeri"
+  ],
+  "land": [
+    "tanah",
+    "daratan"
+  ],
+  "water": [
+    "air"
+  ],
+  "fire": [
+    "api"
+  ],
+  "earth": [
+    "bumi",
+    "tanah"
+  ],
+  "air": [
+    "udara"
+  ],
+  "sun": [
+    "matahari"
+  ],
+  "moon": [
+    "bulan"
+  ],
+  "star": [
+    "bintang"
+  ],
+  "sky": [
+    "langit"
+  ],
+  "sea": [
+    "laut"
+  ],
+  "river": [
+    "sungai"
+  ],
+  "mountain": [
+    "gunung"
+  ],
+  "tree": [
+    "pohon"
+  ],
+  "book": [
+    "buku",
+    "kitab"
+  ],
+  "page": [
+    "halaman"
+  ],
+  "word": [
+    "kata"
+  ],
+  "time": [
+    "waktu"
+  ],
+  "year": [
+    "tahun"
+  ],
+  "day": [
+    "hari"
+  ],
+  "night": [
+    "malam"
+  ],
+  "good": [
+    "baik",
+    "bagus"
+  ],
+  "bad": [
+    "buruk",
+    "jahat"
+  ],
+  "great": [
+    "besar",
+    "agung"
+  ],
+  "small": [
+    "kecil"
+  ],
+  "long": [
+    "panjang",
+    "lama"
+  ],
+  "short": [
+    "pendek"
+  ],
+  "new": [
+    "baru"
+  ],
+  "old": [
+    "lama",
+    "tua"
+  ],
+  "young": [
+    "muda"
+  ],
+  "first": [
+    "pertama"
+  ],
+  "last": [
+    "terakhir"
+  ],
+  "same": [
+    "sama"
+  ],
+  "different": [
+    "berbeda"
+  ],
+  "other": [
+    "lain"
+  ],
+  "another": [
+    "yang lain"
+  ],
+  "such": [
+    "seperti itu",
+    "demikian"
+  ],
+  "own": [
+    "sendiri",
+    "memiliki"
+  ],
+  "very": [
+    "sangat"
+  ]
+}

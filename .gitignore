@@ -1,0 +1,9 @@
+.DS_Store
+/.build
+/.swiftpm
+*.xcodeproj
+*.xcworkspace
+build/
+DerivedData/
+generate_dict.py
+EOF
