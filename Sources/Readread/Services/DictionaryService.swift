@@ -44,7 +44,7 @@ class DictionaryService {
         }
     }
     
-    func translate(word: String, from source: Language, to target: Language) -> TranslationResult? {
+    func translate(word: String, from source: Language, to target: Language, allowOnline: Bool = true) -> TranslationResult? {
         let cleanText = cleanSentence(word)
         guard !cleanText.isEmpty else { return nil }
         
@@ -52,11 +52,12 @@ class DictionaryService {
         let dict = source == .english ? enToId : idToEn
         let langKey = "\(source.rawValue.prefix(2))_\(target.rawValue.prefix(2))_\(cleanText.lowercased())"
         
+        // 1. Dynamic Cache
         if let cached = dynamicCache[langKey] {
             return TranslationResult(word: cleanText, translations: cached, sourceLanguage: source, targetLanguage: target, isSystemDefinition: false)
         }
         
-        // Single word direct lookup in local dictionary
+        // 2. Single word direct lookup in local dictionary
         if !isMultiWord {
             let lower = cleanText.lowercased()
             if let translations = dict[lower] {
@@ -79,14 +80,14 @@ class DictionaryService {
             }
         }
         
-        // Multi-word sentence or missing word: query Online Sentence Translation Engine
-        if let onlineSentenceTranslation = fetchOnlineTranslation(word: cleanText, from: source, to: target) {
+        // 3. Multi-word sentence or missing word: query Online Sentence Translation Engine (if allowed)
+        if allowOnline, let onlineSentenceTranslation = fetchOnlineTranslation(word: cleanText, from: source, to: target) {
             let result = capitalizeFirst(onlineSentenceTranslation)
             dynamicCache[langKey] = [result]
             return TranslationResult(word: cleanText, translations: [result], sourceLanguage: source, targetLanguage: target, isSystemDefinition: false)
         }
         
-        // Offline multi-word fallback: translate individual words and stitch together
+        // 4. Offline multi-word fallback: translate individual words and stitch together
         if isMultiWord {
             let words = cleanText.components(separatedBy: .whitespaces)
             var translatedWords: [String] = []
@@ -102,7 +103,7 @@ class DictionaryService {
             return TranslationResult(word: cleanText, translations: [stitchedSentence], sourceLanguage: source, targetLanguage: target, isSystemDefinition: false)
         }
         
-        // Single word macOS System Dictionary fallback
+        // 5. Single word macOS System Dictionary fallback
         if let systemDef = lookupSystemDictionary(word: cleanText) {
             let cleanedDef = cleanSystemDefinition(systemDef)
             return TranslationResult(word: cleanText, translations: [cleanedDef], sourceLanguage: source, targetLanguage: target, isSystemDefinition: true)
@@ -120,14 +121,16 @@ class DictionaryService {
             return TranslationResult(word: cleanText, translations: [cleanedDef], sourceLanguage: language, targetLanguage: language, isSystemDefinition: true)
         }
         
-        return translate(word: word, from: language, to: language == .english ? .indonesian : .english)
+        return translate(word: word, from: language, to: language == .english ? .indonesian : .english, allowOnline: true)
     }
     
     private func fetchOnlineTranslation(word: String, from source: Language, to target: Language) -> String? {
         let srcCode = source == .english ? "en" : "id"
         let tgtCode = target == .indonesian ? "id" : "en"
         
-        guard let encodedWord = word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+        // Custom character set encoding to prevent URL query parameter breakage
+        let allowed = CharacterSet.urlQueryAllowed.subtracting(CharacterSet(charactersIn: "&+=?#"))
+        guard let encodedWord = word.addingPercentEncoding(withAllowedCharacters: allowed),
               let url = URL(string: "https://api.mymemory.translated.net/get?q=\(encodedWord)&langpair=\(srcCode)|\(tgtCode)") else {
             return nil
         }
@@ -136,7 +139,7 @@ class DictionaryService {
         var resultText: String? = nil
         
         var request = URLRequest(url: url)
-        request.timeoutInterval = 3.5
+        request.timeoutInterval = 2.5
         
         URLSession.shared.dataTask(with: request) { data, _, _ in
             defer { semaphore.signal() }
@@ -158,7 +161,7 @@ class DictionaryService {
             resultText = cleanedMatch.trimmingCharacters(in: .whitespacesAndNewlines)
         }.resume()
         
-        _ = semaphore.wait(timeout: .now() + 3.5)
+        _ = semaphore.wait(timeout: .now() + 2.5)
         return resultText
     }
     

@@ -58,6 +58,20 @@ struct PDFReaderView: NSViewRepresentable {
             object: pdfView
         )
         
+        NotificationCenter.default.addObserver(
+            context.coordinator,
+            selector: #selector(Coordinator.handleFitToPage(_:)),
+            name: .init("FitToPageTrigger"),
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            context.coordinator,
+            selector: #selector(Coordinator.handleFitToWidth(_:)),
+            name: .init("FitToWidthTrigger"),
+            object: nil
+        )
+        
         // Ensure PDFView gets keyboard focus
         DispatchQueue.main.async {
             pdfView.window?.makeFirstResponder(pdfView)
@@ -114,6 +128,26 @@ struct PDFReaderView: NSViewRepresentable {
             self.parent = parent
         }
         
+        @objc func handleFitToPage(_ notification: Notification) {
+            guard let pdfView = notification.object as? PDFView ?? NSApp.keyWindow?.firstResponder as? PDFView else { return }
+            pdfView.autoScales = true
+            pdfView.fitToPage()
+            let newScale = pdfView.scaleFactor
+            DispatchQueue.main.async {
+                self.parent.scaleFactor = newScale
+            }
+        }
+        
+        @objc func handleFitToWidth(_ notification: Notification) {
+            guard let pdfView = notification.object as? PDFView ?? NSApp.keyWindow?.firstResponder as? PDFView else { return }
+            pdfView.autoScales = false
+            pdfView.fitToWidth()
+            let newScale = pdfView.scaleFactor
+            DispatchQueue.main.async {
+                self.parent.scaleFactor = newScale
+            }
+        }
+        
         @objc func pageChanged(_ notification: Notification) {
             guard let pdfView = notification.object as? PDFView,
                   let currentPage = pdfView.currentPage,
@@ -150,7 +184,6 @@ struct PDFReaderView: NSViewRepresentable {
             let bounds = currentSelection.bounds(for: page)
             let viewRect = pdfView.convert(bounds, from: page)
             
-            // Flip Y coordinate from AppKit bottom-left origin to SwiftUI top-left origin
             let swiftUI_Y = pdfView.bounds.height - viewRect.midY
             let swiftUIRect = CGRect(x: viewRect.midX, y: swiftUI_Y, width: viewRect.width, height: viewRect.height)
             

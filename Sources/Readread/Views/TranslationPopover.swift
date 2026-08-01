@@ -10,6 +10,8 @@ struct TranslationPopover: View {
     @AppStorage("targetLanguage") private var targetLangId: String = DictionaryService.Language.indonesian.rawValue
     
     @State private var selectedMode: Mode = .translate
+    @State private var translationResult: DictionaryService.TranslationResult?
+    @State private var isLoading: Bool = false
     
     enum Mode: String, CaseIterable {
         case define = "Define"
@@ -18,17 +20,6 @@ struct TranslationPopover: View {
     
     var sourceLanguage: DictionaryService.Language { DictionaryService.Language(rawValue: sourceLangId) ?? .english }
     var targetLanguage: DictionaryService.Language { DictionaryService.Language(rawValue: targetLangId) ?? .indonesian }
-    
-    var translationResult: DictionaryService.TranslationResult? {
-        let cleanText = selectedText.trimmingCharacters(in: .whitespacesAndNewlines)
-        if cleanText.isEmpty { return nil }
-        
-        if selectedMode == .define {
-            return dictionaryServiceWrapper.service.define(word: cleanText, language: sourceLanguage)
-        } else {
-            return dictionaryServiceWrapper.service.translate(word: cleanText, from: sourceLanguage, to: targetLanguage)
-        }
-    }
     
     var body: some View {
         GeometryReader { geo in
@@ -54,6 +45,7 @@ struct TranslationPopover: View {
                     .pickerStyle(SegmentedPickerStyle())
                     .labelsHidden()
                     .frame(width: 140)
+                    .onChange(of: selectedMode) { _ in performTranslation() }
                     
                     Spacer()
                     
@@ -62,6 +54,7 @@ struct TranslationPopover: View {
                             let temp = sourceLangId
                             sourceLangId = targetLangId
                             targetLangId = temp
+                            performTranslation()
                         }) {
                             HStack(spacing: 4) {
                                 Text(sourceLanguage.rawValue.prefix(2).uppercased())
@@ -101,7 +94,16 @@ struct TranslationPopover: View {
                         
                         Divider()
                         
-                        if let result = translationResult {
+                        if isLoading && translationResult == nil {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .controlSize(.small)
+                                Text("Translating...")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.vertical, 6)
+                        } else if let result = translationResult {
                             VStack(alignment: .leading, spacing: 6) {
                                 ForEach(result.translations, id: \.self) { translation in
                                     HStack(alignment: .top, spacing: 6) {
@@ -135,6 +137,41 @@ struct TranslationPopover: View {
             )
             .shadow(color: Color.black.opacity(0.3), radius: 12, x: 0, y: 6)
             .position(x: posX, y: posY)
+            .onAppear {
+                performTranslation()
+            }
+            .onChange(of: selectedText) { _ in
+                performTranslation()
+            }
+        }
+    }
+    
+    private func performTranslation() {
+        let cleanText = selectedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanText.isEmpty else { return }
+        
+        // 1. Immediately fetch instant offline result
+        if selectedMode == .define {
+            self.translationResult = dictionaryServiceWrapper.service.define(word: cleanText, language: sourceLanguage)
+        } else {
+            self.translationResult = dictionaryServiceWrapper.service.translate(word: cleanText, from: sourceLanguage, to: targetLanguage, allowOnline: false)
+        }
+        
+        // 2. Fetch full sentence online translation in background
+        if selectedMode == .translate {
+            self.isLoading = true
+            let currentSource = sourceLanguage
+            let currentTarget = targetLanguage
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                let fullResult = dictionaryServiceWrapper.service.translate(word: cleanText, from: currentSource, to: currentTarget, allowOnline: true)
+                DispatchQueue.main.async {
+                    if let fullResult = fullResult {
+                        self.translationResult = fullResult
+                    }
+                    self.isLoading = false
+                }
+            }
         }
     }
     

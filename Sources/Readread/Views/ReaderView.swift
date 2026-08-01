@@ -186,9 +186,47 @@ struct ReaderView: View {
                     .frame(width: 220)
                 }
                 
+                // Easy Zoom Controls
+                Button(action: { NotificationCenter.default.post(name: .init("FitToPageTrigger"), object: nil) }) {
+                    Image(systemName: "arrow.up.left.and.down.right.magnifyingglass")
+                }
+                .help("Fit Page to Window")
+                
+                Button(action: { NotificationCenter.default.post(name: .init("FitToWidthTrigger"), object: nil) }) {
+                    Image(systemName: "arrow.left.and.right")
+                }
+                .help("Fit Page to Width")
+                
                 Button(action: { scaleFactor = max(0.2, scaleFactor - 0.1) }) { Image(systemName: "minus.magnifyingglass") }
-                Text("\(Int(scaleFactor * 100))%")
-                    .font(.caption)
+                
+                Menu {
+                    Button("Fit Page to Window") { NotificationCenter.default.post(name: .init("FitToPageTrigger"), object: nil) }
+                    Button("Fit Page to Width") { NotificationCenter.default.post(name: .init("FitToWidthTrigger"), object: nil) }
+                    Divider()
+                    Button("50%") { scaleFactor = 0.5 }
+                    Button("75%") { scaleFactor = 0.75 }
+                    Button("100% (Actual Size)") { scaleFactor = 1.0 }
+                    Button("125%") { scaleFactor = 1.25 }
+                    Button("150%") { scaleFactor = 1.50 }
+                    Button("200%") { scaleFactor = 2.0 }
+                    Button("300%") { scaleFactor = 3.0 }
+                    Button("400%") { scaleFactor = 4.0 }
+                } label: {
+                    HStack(spacing: 3) {
+                        Text("\(Int(scaleFactor * 100))%")
+                            .font(.caption.bold())
+                            .foregroundColor(Color.textPrimary)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 8))
+                            .foregroundColor(Color.textPrimary)
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.primary.opacity(0.08))
+                    .cornerRadius(4)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
                 Button(action: { scaleFactor = min(5.0, scaleFactor + 0.1) }) { Image(systemName: "plus.magnifyingglass") }
                 
                 Button(action: { rotation = (rotation + 90) % 360 }) { Image(systemName: "rotate.right") }
