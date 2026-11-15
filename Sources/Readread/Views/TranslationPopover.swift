@@ -4,191 +4,250 @@ struct TranslationPopover: View {
     let selectedText: String
     let selectionRect: CGRect
     @Binding var isPresented: Bool
-    
+
     @EnvironmentObject var dictionaryServiceWrapper: DictionaryServiceWrapper
     @AppStorage("sourceLanguage") private var sourceLangId: String = DictionaryService.Language.english.rawValue
     @AppStorage("targetLanguage") private var targetLangId: String = DictionaryService.Language.indonesian.rawValue
-    
-    @State private var selectedMode: Mode = .translate
-    @State private var translationResult: DictionaryService.TranslationResult?
-    @State private var isLoading: Bool = false
-    
-    enum Mode: String, CaseIterable {
-        case define = "Define"
-        case translate = "Translate"
+
+    @StateObject private var controller = TranslationController()
+    @State private var selectedMode: DictionaryService.TranslationMode = .translate
+
+    var sourceLanguage: DictionaryService.Language {
+        DictionaryService.Language(rawValue: sourceLangId) ?? .english
     }
-    
-    var sourceLanguage: DictionaryService.Language { DictionaryService.Language(rawValue: sourceLangId) ?? .english }
-    var targetLanguage: DictionaryService.Language { DictionaryService.Language(rawValue: targetLangId) ?? .indonesian }
-    
+
+    var targetLanguage: DictionaryService.Language {
+        DictionaryService.Language(rawValue: targetLangId) ?? .indonesian
+    }
+
     var body: some View {
         GeometryReader { geo in
-            let popoverWidth: CGFloat = 360
-            let popoverHeight: CGFloat = min(260, geo.size.height * 0.4)
-            
-            let rawX = selectionRect.origin.x
-            let rawY = selectionRect.origin.y
-            
-            let posX = clamp(rawX, min: popoverWidth/2 + 20, max: max(popoverWidth/2 + 20, geo.size.width - popoverWidth/2 - 20))
-            
-            let preferredY = (rawY - popoverHeight/2 - 30 > 60) ? (rawY - popoverHeight/2 - 20) : (rawY + popoverHeight/2 + 30)
-            let posY = clamp(preferredY, min: popoverHeight/2 + 20, max: max(popoverHeight/2 + 20, geo.size.height - popoverHeight/2 - 20))
-            
+            let layout = Self.computeLayout(selectionRect: selectionRect, viewportSize: geo.size)
+            let displaySelection = DictionaryService.normalizeDisplayText(selectedText)
+
             VStack(alignment: .leading, spacing: 10) {
-                // Header bar
+                // Header: segmented control, language direction, accessible close button
                 HStack(spacing: 8) {
-                    Picker("", selection: $selectedMode) {
-                        ForEach(Mode.allCases, id: \.self) { mode in
+                    Picker("Lookup mode", selection: $selectedMode) {
+                        ForEach(DictionaryService.TranslationMode.allCases, id: \.self) { mode in
                             Text(mode.rawValue).tag(mode)
                         }
                     }
-                    .pickerStyle(SegmentedPickerStyle())
+                    .pickerStyle(.segmented)
                     .labelsHidden()
-                    .frame(width: 140)
-                    .onChange(of: selectedMode) { _ in performTranslation() }
-                    
-                    Spacer()
-                    
+                    .frame(width: 146)
+
+                    Spacer(minLength: 4)
+
                     if selectedMode == .translate {
-                        Button(action: {
-                            let temp = sourceLangId
-                            sourceLangId = targetLangId
-                            targetLangId = temp
-                            performTranslation()
-                        }) {
+                        Button(action: swapLanguages) {
                             HStack(spacing: 4) {
-                                Text(sourceLanguage.rawValue.prefix(2).uppercased())
-                                    .font(.caption2.bold())
+                                Text(sourceLanguage.shortLabel)
+                                    .font(.caption2.weight(.semibold))
                                 Image(systemName: "arrow.left.arrow.right")
-                                    .font(.system(size: 9))
-                                Text(targetLanguage.rawValue.prefix(2).uppercased())
-                                    .font(.caption2.bold())
+                                    .font(.system(size: 9, weight: .medium))
+                                Text(targetLanguage.shortLabel)
+                                    .font(.caption2.weight(.semibold))
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.accentBrown.opacity(0.2))
-                            .foregroundColor(.accentBrown)
+                            .background(Color.accentBrown.opacity(0.14))
+                            .foregroundColor(Color.accentBrown)
                             .cornerRadius(6)
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Swap \(sourceLanguage.rawValue) and \(targetLanguage.rawValue)")
                     }
-                    
-                    Button(action: { isPresented = false }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
-                            .font(.system(size: 16))
+
+                    Button(action: dismissPopover) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(Color.textSecondary)
+                            .frame(width: 22, height: 22)
+                            .background(Color.primary.opacity(0.06))
+                            .clipShape(Circle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(.plain)
+                    .keyboardShortcut(.cancelAction)
+                    .accessibilityLabel("Close translation")
                 }
-                
+
                 Divider()
-                
-                // Selected Sentence & Translation Scrollable View
+
+                // Scrollable selected text + translation/definition body
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(selectedText)
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                            .lineLimit(3)
+                        Text(displaySelection.isEmpty ? selectedText : displaySelection)
+                            .font(.system(.title3, design: .serif).weight(.medium))
+                            .foregroundColor(Color.textPrimary)
                             .multilineTextAlignment(.leading)
-                        
+                            .fixedSize(horizontal: false, vertical: true)
+
                         Divider()
-                        
-                        if isLoading && translationResult == nil {
-                            HStack(spacing: 8) {
-                                ProgressView()
-                                    .controlSize(.small)
-                                Text("Translating...")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(.vertical, 6)
-                        } else if let result = translationResult {
-                            VStack(alignment: .leading, spacing: 6) {
-                                ForEach(result.translations, id: \.self) { translation in
-                                    HStack(alignment: .top, spacing: 6) {
-                                        Text("•")
-                                            .foregroundColor(.accentBrown)
-                                            .bold()
-                                        Text(translation)
-                                            .font(.body)
-                                            .foregroundColor(.primary)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
-                                }
-                            }
-                        } else {
-                            Text("No translation found.")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .italic()
-                        }
+
+                        resultBody
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 2)
                 }
             }
             .padding(14)
-            .frame(width: popoverWidth, height: popoverHeight)
-            .background(Color(nsColor: .windowBackgroundColor))
-            .cornerRadius(14)
+            .frame(width: layout.size.width, height: layout.size.height, alignment: .topLeading)
+            .background(Color.paperWhite)
+            .cornerRadius(10)
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.primary.opacity(0.15), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.primary.opacity(0.12), lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.3), radius: 12, x: 0, y: 6)
-            .position(x: posX, y: posY)
+            .shadow(color: Color.black.opacity(0.14), radius: 8, x: 0, y: 3)
+            .position(x: layout.center.x, y: layout.center.y)
             .onAppear {
-                performTranslation()
+                controller.resetForPresentation()
+                triggerLookup(immediate: true)
+            }
+            .onDisappear {
+                controller.dismiss()
+            }
+            .onExitCommand {
+                dismissPopover()
             }
             .onChange(of: selectedText) { _ in
-                performTranslation()
+                triggerLookup(immediate: false)
+            }
+            .onChange(of: selectedMode) { _ in
+                triggerLookup(immediate: true)
+            }
+            .onChange(of: sourceLangId) { _ in
+                triggerLookup(immediate: true)
+            }
+            .onChange(of: targetLangId) { _ in
+                triggerLookup(immediate: true)
             }
         }
     }
-    
-    private func performTranslation() {
-        let cleanText = selectedText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleanText.isEmpty else { return }
-        
-        // 1. Fetch instant offline result
-        let offlineResult: DictionaryService.TranslationResult?
-        if selectedMode == .define {
-            offlineResult = dictionaryServiceWrapper.service.define(word: cleanText, language: sourceLanguage)
-        } else {
-            offlineResult = dictionaryServiceWrapper.service.translate(word: cleanText, from: sourceLanguage, to: targetLanguage, allowOnline: false)
-        }
-        
-        self.translationResult = offlineResult
-        
-        // 2. Only query online API if offline dictionary found no valid match OR if it's a multi-word sentence
-        let hasOfflineMatch = offlineResult != nil && !(offlineResult?.translations.first?.contains("Tidak ada terjemahan") ?? true) && !(offlineResult?.translations.first?.contains("No translation found") ?? true)
-        
-        let isMultiWord = cleanText.contains(" ")
-        
-        if selectedMode == .translate && (!hasOfflineMatch || isMultiWord) {
-            self.isLoading = true
-            let currentSource = sourceLanguage
-            let currentTarget = targetLanguage
-            
-            DispatchQueue.global(qos: .userInitiated).async {
-                let fullResult = dictionaryServiceWrapper.service.translate(word: cleanText, from: currentSource, to: currentTarget, allowOnline: true)
-                DispatchQueue.main.async {
-                    if let fullResult = fullResult {
-                        let validOnline = !(fullResult.translations.first?.lowercased() == cleanText.lowercased())
-                        if validOnline || !hasOfflineMatch {
-                            self.translationResult = fullResult
-                        }
+
+    @ViewBuilder
+    private var resultBody: some View {
+        if controller.isLoading && controller.result == nil {
+            HStack(spacing: 8) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Looking up…")
+                    .font(.subheadline)
+                    .foregroundColor(Color.textSecondary)
+            }
+            .padding(.vertical, 4)
+        } else if let result = controller.result {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Text(result.source.displayLabel)
+                        .font(.caption)
+                        .foregroundColor(Color.textSecondary)
+
+                    if controller.isLoading {
+                        ProgressView()
+                            .controlSize(.mini)
                     }
-                    self.isLoading = false
+                }
+
+                ForEach(Array(result.translations.enumerated()), id: \.offset) { _, entry in
+                    HStack(alignment: .top, spacing: 6) {
+                        if result.translations.count > 1 {
+                            Text("•")
+                                .foregroundColor(Color.accentBrown)
+                                .font(.body.weight(.semibold))
+                        }
+                        Text(entry)
+                            .font(.body)
+                            .foregroundColor(Color.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        } else if let failure = controller.failure {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(failure.userMessage)
+                    .font(.subheadline)
+                    .foregroundColor(Color.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if case .timeout = failure {
+                    Button("Try Again") {
+                        triggerLookup(immediate: true)
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(Color.accentBrown)
+                    .buttonStyle(.plain)
+                } else if case .unavailable = failure {
+                    Button("Try Again") {
+                        triggerLookup(immediate: true)
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(Color.accentBrown)
+                    .buttonStyle(.plain)
                 }
             }
         } else {
-            self.isLoading = false
+            Text("No matching entry was found.")
+                .font(.subheadline)
+                .foregroundColor(Color.textSecondary)
         }
     }
-    
-    private func clamp(_ val: CGFloat, min minVal: CGFloat, max maxVal: CGFloat) -> CGFloat {
-        if maxVal < minVal { return minVal }
-        return Swift.min(Swift.max(val, minVal), maxVal)
+
+    private func swapLanguages() {
+        let previousSource = sourceLangId
+        sourceLangId = targetLangId
+        targetLangId = previousSource
+    }
+
+    private func dismissPopover() {
+        controller.dismiss()
+        isPresented = false
+    }
+
+    private func triggerLookup(immediate: Bool) {
+        guard isPresented else { return }
+        controller.requestLookup(
+            selectedText: selectedText,
+            mode: selectedMode,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            service: dictionaryServiceWrapper.service,
+            immediate: immediate
+        )
+    }
+
+    static func computeLayout(selectionRect: CGRect, viewportSize: CGSize) -> (size: CGSize, center: CGPoint) {
+        let edgePadding: CGFloat = 12
+        let gap: CGFloat = 10
+
+        let maxWidth = max(180, viewportSize.width - edgePadding * 2)
+        let width = min(340, maxWidth)
+
+        let maxHeight = max(120, viewportSize.height - edgePadding * 2)
+        let height = min(250, max(160, min(maxHeight, viewportSize.height * 0.42)))
+
+        let minCenterX = width / 2 + edgePadding
+        let maxCenterX = max(minCenterX, viewportSize.width - width / 2 - edgePadding)
+        let centerX = clamp(selectionRect.midX, min: minCenterX, max: maxCenterX)
+
+        let minCenterY = height / 2 + edgePadding
+        let maxCenterY = max(minCenterY, viewportSize.height - height / 2 - edgePadding)
+
+        let spaceAbove = selectionRect.minY - gap - edgePadding
+        let preferredCenterY: CGFloat
+        if spaceAbove >= height {
+            preferredCenterY = selectionRect.minY - gap - height / 2
+        } else {
+            preferredCenterY = selectionRect.maxY + gap + height / 2
+        }
+        let centerY = clamp(preferredCenterY, min: minCenterY, max: maxCenterY)
+
+        return (CGSize(width: width, height: height), CGPoint(x: centerX, y: centerY))
+    }
+
+    private static func clamp(_ value: CGFloat, min minValue: CGFloat, max maxValue: CGFloat) -> CGFloat {
+        if maxValue < minValue { return minValue }
+        return Swift.min(Swift.max(value, minValue), maxValue)
     }
 }

@@ -1,65 +1,60 @@
-import PDFKit
 import AppKit
+import PDFKit
 
 extension PDFView {
-    func rotateCurrentPage(clockwise: Bool = true) {
-        guard let page = currentPage else { return }
-        let currentRotation = page.rotation
-        let newRotation = (currentRotation + (clockwise ? 90 : -90) + 360) % 360
-        page.rotation = newRotation
-        
-        let index = currentPageIndex
-        layoutDocumentView()
-        
-        if let index = index, let doc = document, let restoredPage = doc.page(at: index) {
-            go(to: restoredPage)
-        }
-    }
-    
-    func rotateAllPages(clockwise: Bool = true) {
-        guard let doc = document else { return }
-        for i in 0..<doc.pageCount {
-            if let page = doc.page(at: i) {
-                let newRotation = (page.rotation + (clockwise ? 90 : -90) + 360) % 360
-                page.rotation = newRotation
-            }
-        }
-        let index = currentPageIndex
-        layoutDocumentView()
-        
-        if let index = index, let restoredPage = doc.page(at: index) {
-            go(to: restoredPage)
-        }
-    }
-    
-    func zoomIn() {
-        scaleFactor += 0.25
-    }
-    
-    func zoomOut() {
-        scaleFactor = max(0.1, scaleFactor - 0.25)
-    }
-    
-    func fitToWidth() {
-        guard let page = currentPage, let viewBounds = documentView?.bounds else { return }
+    func rotatedPageSize(for page: PDFPage) -> CGSize {
         let pageBounds = page.bounds(for: displayBox)
-        let ratio = bounds.width / pageBounds.width
+        let normalizedRotation = ((page.rotation % 360) + 360) % 360
+        if normalizedRotation == 90 || normalizedRotation == 270 {
+            return CGSize(width: pageBounds.height, height: pageBounds.width)
+        }
+        return pageBounds.size
+    }
+
+    func fitToWidthScale(padding: CGFloat = 24) -> CGFloat? {
+        guard let page = currentPage else { return nil }
+        let pageSize = rotatedPageSize(for: page)
+        guard pageSize.width > 0, bounds.width > padding else { return nil }
+        return (bounds.width - padding) / pageSize.width
+    }
+
+    func fitToPageScale(padding: CGFloat = 24) -> CGFloat? {
+        guard let page = currentPage else { return nil }
+        let pageSize = rotatedPageSize(for: page)
+        guard pageSize.width > 0, pageSize.height > 0,
+              bounds.width > padding, bounds.height > padding else { return nil }
+        let widthRatio = (bounds.width - padding) / pageSize.width
+        let heightRatio = (bounds.height - padding) / pageSize.height
+        return min(widthRatio, heightRatio)
+    }
+
+    func fitToWidth() {
+        guard let ratio = fitToWidthScale() else { return }
+        autoScales = false
         scaleFactor = ratio
     }
-    
+
     func fitToPage() {
-        guard let page = currentPage else { return }
-        let pageBounds = page.bounds(for: displayBox)
-        let widthRatio = bounds.width / pageBounds.width
-        let heightRatio = bounds.height / pageBounds.height
-        scaleFactor = min(widthRatio, heightRatio)
+        guard let ratio = fitToPageScale() else { return }
+        autoScales = false
+        scaleFactor = ratio
     }
-    
+
+    func zoomIn() {
+        autoScales = false
+        scaleFactor = min(5.0, scaleFactor + 0.25)
+    }
+
+    func zoomOut() {
+        autoScales = false
+        scaleFactor = max(0.2, scaleFactor - 0.25)
+    }
+
     var currentPageIndex: Int? {
         guard let page = currentPage else { return nil }
         return document?.index(for: page)
     }
-    
+
     var totalPageCount: Int? {
         return document?.pageCount
     }
