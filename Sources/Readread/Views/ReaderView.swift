@@ -1,131 +1,58 @@
-import SwiftUI
 import PDFKit
+import SwiftUI
 
 struct ReaderView: View {
     let book: BookItem
     let onBack: () -> Void
-    
+
     @EnvironmentObject var historyStore: ReadingHistoryStore
     @EnvironmentObject var bookmarkService: BookmarkService
-    
-    @State private var pdfDocument: PDFDocument?
-    @State private var currentPageIndex: Int = 0
-    @State private var scaleFactor: CGFloat = 1.0
-    @State private var rotation: Int = 0
-    
-    @State private var showTOC: Bool = false
-    @State private var showSearch: Bool = false
-    @State private var searchQuery: String = ""
+
     @AppStorage("defaultZoomLevel") private var defaultZoomLevel: Double = 100.0
-    
-    @State private var selectedText: String = ""
-    @State private var selectionRect: CGRect = .zero
-    @State private var showTranslation: Bool = false
-    
+    @AppStorage("showTranslationOnSelection") private var showTranslationOnSelection: Bool = true
+
+    @StateObject private var controller: ReaderController
     @State private var showGoToPage: Bool = false
     @State private var goToPageText: String = ""
-    @State private var keyMonitor: Any?
-    
+    @State private var goToPageError: String? = nil
+    @FocusState private var isSearchFieldFocused: Bool
+
+    init(book: BookItem, onBack: @escaping () -> Void) {
+        self.book = book
+        self.onBack = onBack
+        let storedDefaultZoom = UserDefaults.standard.double(forKey: "defaultZoomLevel")
+        let effectiveDefault = storedDefaultZoom > 0 ? storedDefaultZoom : 100.0
+        _controller = StateObject(wrappedValue: ReaderController(book: book, defaultZoomLevel: effectiveDefault))
+    }
+
     var body: some View {
         HStack(spacing: 0) {
-            // Collapsible Sidebar Drawer
-            if showTOC {
-                if let doc = pdfDocument {
-                    TableOfContentsView(document: doc, bookId: book.id, currentPageIndex: currentPageIndex) { pageIdx in
-                        currentPageIndex = pageIdx
-                    }
-                    .frame(width: 260)
-                    .transition(.move(edge: .leading))
-                    
-                    Divider()
+            if controller.showTOC, let doc = controller.document {
+                TableOfContentsView(
+                    document: doc,
+                    bookId: book.id,
+                    currentPageIndex: controller.currentPageIndex
+                ) { pageIdx in
+                    controller.perform(.goToPage(pageIdx))
+                    controller.focusPDFView()
                 }
+                .frame(width: 260)
+
+                Divider()
             }
-            
-            // Main Content Area
-            ZStack {
-                VStack(spacing: 0) {
-                    if showSearch {
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                            TextField("Search...", text: $searchQuery)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            Button("Done") {
-                                showSearch = false
-                                searchQuery = ""
-                            }
-                        }
-                        .padding(8)
-                        .background(Color(nsColor: .controlBackgroundColor))
-                    }
-                    
-                    if let doc = pdfDocument {
-                        PDFReaderView(
-                            document: doc,
-                            currentPageIndex: $currentPageIndex,
-                            scaleFactor: $scaleFactor,
-                            rotation: $rotation
-                        ) { text, rect in
-                            selectedText = text
-                            selectionRect = rect
-                            if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                showTranslation = true
-                            } else {
-                                showTranslation = false
-                            }
-                        }
-                        .background(Color.offWhite)
-                    } else {
-                        VStack(spacing: 12) {
-                            ProgressView("Loading document...")
-                            Text(book.title)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                    
-                    // Bottom Bar
-                    HStack {
-                        Button(action: { previousPage() }) {
-                            Image(systemName: "chevron.left")
-                                .font(.headline)
-                        }
-                        .disabled(currentPageIndex == 0)
-                        
-                        let totalPages = pdfDocument?.pageCount ?? 1
-                        if totalPages > 1 {
-                            Slider(value: Binding(
-                                get: { Double(currentPageIndex) },
-                                set: { currentPageIndex = Int($0) }
-                            ), in: 0...Double(totalPages - 1), step: 1)
-                        } else {
-                            Spacer()
-                        }
-                        
-                        Button(action: { nextPage() }) {
-                            Image(systemName: "chevron.right")
-                                .font(.headline)
-                        }
-                        .disabled(currentPageIndex >= (pdfDocument?.pageCount ?? 1) - 1)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(Color(nsColor: .windowBackgroundColor))
-                    .overlay(
-                        Rectangle().frame(height: 1).foregroundColor(Color.gray.opacity(0.2)),
-                        alignment: .top
-                    )
+
+            VStack(spacing: 0) {
+                if controller.showSearch {
+                    searchBar
                 }
-                
-                // Floating Translation Popover Box
-                if showTranslation && !selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    TranslationPopover(selectedText: selectedText, selectionRect: selectionRect, isPresented: $showTranslation)
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                        .animation(.easeInOut(duration: 0.15), value: showTranslation)
+
+                readerContentArea
+
+                if controller.hasActiveDocument {
+                    bottomNavigationBar
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: showTOC)
         .navigationTitle(book.title)
         .toolbar {
             ToolbarItem(placement: .navigation) {
@@ -137,275 +64,462 @@ struct ReaderView: View {
                     .foregroundColor(Color.textPrimary)
                 }
             }
-            
+
             ToolbarItemGroup(placement: .primaryAction) {
-                Button(action: {
-                    withAnimation {
-                        showTOC.toggle()
-                    }
-                }) {
+                Button(action: { controller.perform(.toggleTOC) }) {
                     Image(systemName: "sidebar.left")
-                        .foregroundColor(showTOC ? .accentBrown : Color.textPrimary)
+                        .foregroundColor(controller.showTOC ? .accentBrown : Color.textPrimary)
                 }
+                .disabled(!controller.hasActiveDocument)
                 .help("Toggle Contents Sidebar (⌘T)")
-                
+
+                pageIndicatorButton
+
+                Divider()
+
+                Button(action: { controller.perform(.zoomOut) }) {
+                    Image(systemName: "minus.magnifyingglass")
+                }
+                .disabled(!controller.hasActiveDocument)
+                .help("Zoom Out (⌘-)")
+
+                zoomMenu
+
+                Button(action: { controller.perform(.zoomIn) }) {
+                    Image(systemName: "plus.magnifyingglass")
+                }
+                .disabled(!controller.hasActiveDocument)
+                .help("Zoom In (⌘+)")
+
+                Divider()
+
+                Button(action: { controller.perform(.rotateClockwise) }) {
+                    Image(systemName: "rotate.right")
+                }
+                .disabled(!controller.hasActiveDocument)
+                .help("Rotate Clockwise (⌘R)")
+
+                Button(action: { controller.perform(.toggleBookmark) }) {
+                    Image(
+                        systemName: bookmarkService.isBookmarked(bookId: book.id, pageIndex: controller.currentPageIndex)
+                            ? "star.fill"
+                            : "star"
+                    )
+                    .foregroundColor(
+                        bookmarkService.isBookmarked(bookId: book.id, pageIndex: controller.currentPageIndex)
+                            ? .accentBrown
+                            : Color.textPrimary
+                    )
+                }
+                .disabled(!controller.hasActiveDocument)
+                .help("Toggle Bookmark (⌘B)")
+
                 Button(action: {
-                    goToPageText = "\(currentPageIndex + 1)"
-                    showGoToPage = true
-                }) {
-                    Text("Page \(currentPageIndex + 1) of \(pdfDocument?.pageCount ?? 1)")
-                        .font(.caption.bold())
-                        .foregroundColor(Color.textPrimary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.primary.opacity(0.08))
-                        .cornerRadius(6)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .popover(isPresented: $showGoToPage) {
-                    VStack(spacing: 12) {
-                        Text("Go to Page").font(.headline)
-                        HStack {
-                            TextField("Page", text: $goToPageText)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .frame(width: 80)
-                                .onSubmit {
-                                    jumpToPage()
-                                }
-                            Text("of \(pdfDocument?.pageCount ?? 1)")
-                                .foregroundColor(.secondary)
-                        }
-                        HStack(spacing: 12) {
-                            Button("Cancel") { showGoToPage = false }
-                            Button("Go") { jumpToPage() }
-                                .keyboardShortcut(.return)
-                                .buttonStyle(.borderedProminent)
-                        }
+                    if controller.showSearch {
+                        controller.perform(.closeFind)
+                    } else {
+                        controller.perform(.openFind)
+                        isSearchFieldFocused = true
                     }
-                    .padding(16)
-                    .frame(width: 220)
-                }
-                
-                // Easy Zoom Controls
-                Button(action: { NotificationCenter.default.post(name: .init("FitToPageTrigger"), object: nil) }) {
-                    Image(systemName: "arrow.up.left.and.down.right.magnifyingglass")
-                }
-                .help("Fit Page to Window")
-                
-                Button(action: { NotificationCenter.default.post(name: .init("FitToWidthTrigger"), object: nil) }) {
-                    Image(systemName: "arrow.left.and.right")
-                }
-                .help("Fit Page to Width")
-                
-                Button(action: { scaleFactor = max(0.2, scaleFactor - 0.1) }) { Image(systemName: "minus.magnifyingglass") }
-                
-                Menu {
-                    Button("Fit Page to Window") { NotificationCenter.default.post(name: .init("FitToPageTrigger"), object: nil) }
-                    Button("Fit Page to Width") { NotificationCenter.default.post(name: .init("FitToWidthTrigger"), object: nil) }
-                    Divider()
-                    Button("50%") { scaleFactor = 0.5 }
-                    Button("75%") { scaleFactor = 0.75 }
-                    Button("100% (Actual Size)") { scaleFactor = 1.0 }
-                    Button("125%") { scaleFactor = 1.25 }
-                    Button("150%") { scaleFactor = 1.50 }
-                    Button("200%") { scaleFactor = 2.0 }
-                    Button("300%") { scaleFactor = 3.0 }
-                    Button("400%") { scaleFactor = 4.0 }
-                } label: {
-                    HStack(spacing: 3) {
-                        Text("\(Int(scaleFactor * 100))%")
-                            .font(.caption.bold())
-                            .foregroundColor(Color.textPrimary)
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 8))
-                            .foregroundColor(Color.textPrimary)
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(Color.primary.opacity(0.08))
-                    .cornerRadius(4)
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                Button(action: { scaleFactor = min(5.0, scaleFactor + 0.1) }) { Image(systemName: "plus.magnifyingglass") }
-                
-                Button(action: { rotation = (rotation + 90) % 360 }) { Image(systemName: "rotate.right") }
-                
-                Button(action: {
-                    bookmarkService.toggleBookmark(bookId: book.id, pageIndex: currentPageIndex)
                 }) {
-                    Image(systemName: bookmarkService.isBookmarked(bookId: book.id, pageIndex: currentPageIndex) ? "star.fill" : "star")
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(controller.showSearch ? .accentBrown : Color.textPrimary)
                 }
-                
-                Button(action: { showSearch.toggle() }) { Image(systemName: "magnifyingglass") }
+                .disabled(!controller.hasActiveDocument)
+                .help("Find in Document (⌘F)")
             }
         }
-        .onAppear {
-            loadDocument()
-            currentPageIndex = book.lastPageIndex
-            rotation = book.rotation
-            scaleFactor = book.zoomLevel > 0 ? book.zoomLevel : defaultZoomLevel / 100.0
-            setupKeyboardMonitor()
+        .task(id: book.id) {
+            controller.onToggleBookmark = { [weak controller, weak bookmarkService] in
+                guard let controller else { return }
+                bookmarkService?.toggleBookmark(bookId: book.id, pageIndex: controller.currentPageIndex)
+            }
+            controller.load(using: historyStore)
         }
         .onDisappear {
-            removeKeyboardMonitor()
+            controller.onToggleBookmark = nil
+            controller.pdfView = nil
         }
-        .onChange(of: currentPageIndex) { newPage in
-            historyStore.updateProgress(for: book.id, page: newPage, totalPages: pdfDocument?.pageCount, rotation: rotation, zoom: scaleFactor)
+        .onChange(of: controller.currentPageIndex) { newPage in
+            guard controller.hasActiveDocument else { return }
+            historyStore.updateProgress(
+                for: book.id,
+                page: newPage,
+                totalPages: controller.pageCount,
+                rotation: controller.rotationOffset,
+                zoom: Double(controller.effectiveScaleFactor)
+            )
         }
-        .onChange(of: rotation) { newRot in
-            historyStore.updateProgress(for: book.id, page: currentPageIndex, totalPages: pdfDocument?.pageCount, rotation: newRot, zoom: scaleFactor)
+        .onChange(of: controller.rotationOffset) { newRot in
+            guard controller.hasActiveDocument else { return }
+            historyStore.updateProgress(
+                for: book.id,
+                page: controller.currentPageIndex,
+                totalPages: controller.pageCount,
+                rotation: newRot,
+                zoom: Double(controller.effectiveScaleFactor)
+            )
         }
-        .onChange(of: scaleFactor) { newZoom in
-            historyStore.updateProgress(for: book.id, page: currentPageIndex, totalPages: pdfDocument?.pageCount, rotation: rotation, zoom: newZoom)
+        .onChange(of: controller.effectiveScaleFactor) { newZoom in
+            guard controller.hasActiveDocument else { return }
+            historyStore.updateProgress(
+                for: book.id,
+                page: controller.currentPageIndex,
+                totalPages: controller.pageCount,
+                rotation: controller.rotationOffset,
+                zoom: Double(newZoom)
+            )
+        }
+        .onChange(of: controller.showTOC) { _ in
+            DispatchQueue.main.async {
+                controller.recalculateFitScaleIfNeeded()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("ZoomInTrigger"))) { _ in
+            controller.perform(.zoomIn)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("ZoomOutTrigger"))) { _ in
+            controller.perform(.zoomOut)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("RotateTrigger"))) { _ in
+            controller.perform(.rotateClockwise)
         }
         .onReceive(NotificationCenter.default.publisher(for: .init("ToggleTOCTrigger"))) { _ in
-            withAnimation {
-                showTOC.toggle()
+            controller.perform(.toggleTOC)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("FindTrigger"))) { _ in
+            controller.perform(.openFind)
+            isSearchFieldFocused = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("ToggleBookmarkTrigger"))) { _ in
+            controller.perform(.toggleBookmark)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("FitToPageTrigger"))) { _ in
+            controller.perform(.fitToPage)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("FitToWidthTrigger"))) { _ in
+            controller.perform(.fitToWidth)
+        }
+    }
+
+    // MARK: - Subviews
+
+    @ViewBuilder
+    private var readerContentArea: some View {
+        switch controller.loadState {
+        case .loading:
+            VStack(spacing: 12) {
+                ProgressView()
+                    .controlSize(.regular)
+                Text("Opening \"\(book.title)\"...")
+                    .font(.headline)
+                    .foregroundColor(Color.textPrimary)
+                Text("Preparing pages and layout")
+                    .font(.subheadline)
+                    .foregroundColor(Color.textSecondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.offWhite)
+
+        case .failed(let error):
+            VStack(spacing: 14) {
+                Image(systemName: iconName(for: error))
+                    .font(.system(size: 38))
+                    .foregroundColor(.accentBrown)
+
+                Text(error.title)
+                    .font(.title3.weight(.semibold))
+                    .foregroundColor(Color.textPrimary)
+
+                if let description = error.errorDescription {
+                    Text(description)
+                        .font(.body)
+                        .foregroundColor(Color.textPrimary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 440)
+                }
+
+                if let recovery = error.recoverySuggestion {
+                    Text(recovery)
+                        .font(.subheadline)
+                        .foregroundColor(Color.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 440)
+                }
+
+                HStack(spacing: 12) {
+                    Button("Back to Library") {
+                        onBack()
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("Try Again") {
+                        controller.load(using: historyStore)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.accentBrown)
+                }
+                .padding(.top, 4)
+            }
+            .padding(32)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.offWhite)
+
+        case .loaded:
+            if let doc = controller.document {
+                ZStack {
+                    PDFReaderView(
+                        document: doc,
+                        controller: controller,
+                        onSelectionChanged: { text, rect in
+                            controller.updateSelection(
+                                text: text,
+                                rect: rect,
+                                autoShowTranslation: showTranslationOnSelection
+                            )
+                        },
+                        onClearSelection: {
+                            controller.clearSelection()
+                        }
+                    )
+                    .background(Color.offWhite)
+
+                    if controller.showTranslation && !controller.selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        TranslationPopover(
+                            selectedText: controller.selectedText,
+                            selectionRect: controller.selectionRect,
+                            isPresented: $controller.showTranslation
+                        )
+                    }
+                }
             }
         }
     }
-    
-    private func previousPage() {
-        if currentPageIndex > 0 {
-            currentPageIndex -= 1
-        }
-    }
-    
-    private func nextPage() {
-        if let doc = pdfDocument, currentPageIndex < doc.pageCount - 1 {
-            currentPageIndex += 1
-        }
-    }
-    
-    private func setupKeyboardMonitor() {
-        removeKeyboardMonitor()
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            switch event.keyCode {
-            case 123, 126, 116:
-                DispatchQueue.main.async { self.previousPage() }
-                return nil
-            case 124, 125, 121, 49:
-                DispatchQueue.main.async { self.nextPage() }
-                return nil
-            default:
-                return event
+
+    private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(Color.textSecondary)
+
+            TextField(
+                "Find in document...",
+                text: Binding(
+                    get: { controller.searchQuery },
+                    set: { controller.updateSearch(query: $0) }
+                )
+            )
+            .textFieldStyle(.roundedBorder)
+            .focused($isSearchFieldFocused)
+            .onSubmit {
+                controller.perform(.findNext)
             }
+
+            if !controller.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                if controller.searchMatches.isEmpty {
+                    Text("No matches")
+                        .font(.caption)
+                        .foregroundColor(Color.textSecondary)
+                } else {
+                    Text("\((controller.currentSearchMatchIndex ?? 0) + 1) of \(controller.searchMatches.count)")
+                        .font(.caption.monospacedDigit())
+                        .foregroundColor(Color.textSecondary)
+                }
+            }
+
+            Button(action: { controller.perform(.findPrevious) }) {
+                Image(systemName: "chevron.up")
+            }
+            .disabled(controller.searchMatches.isEmpty)
+            .help("Previous Match")
+
+            Button(action: { controller.perform(.findNext) }) {
+                Image(systemName: "chevron.down")
+            }
+            .disabled(controller.searchMatches.isEmpty)
+            .help("Next Match")
+
+            Button("Done") {
+                controller.perform(.closeFind)
+            }
+            .keyboardShortcut(.escape, modifiers: [])
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color.warmCream)
+        .overlay(
+            Rectangle().frame(height: 1).foregroundColor(Color.primary.opacity(0.1)),
+            alignment: .bottom
+        )
     }
-    
-    private func removeKeyboardMonitor() {
-        if let monitor = keyMonitor {
-            NSEvent.removeMonitor(monitor)
-            keyMonitor = nil
-        }
-    }
-    
-    private func loadDocument() {
-        guard let url = historyStore.resolveURL(for: book) else { return }
-        _ = url.startAccessingSecurityScopedResource()
-        
-        if book.fileFormat == .pdf {
-            pdfDocument = PDFDocument(url: url)
-        } else {
-            pdfDocument = createPDFFromText(url: url)
-        }
-    }
-    
-    private func jumpToPage() {
-        if let page = Int(goToPageText), page >= 1, page <= (pdfDocument?.pageCount ?? 1) {
-            currentPageIndex = page - 1
-        }
-        showGoToPage = false
-    }
-    
-    private func createPDFFromText(url: URL) -> PDFDocument? {
-        do {
-            let attrStr: NSAttributedString
-            if book.fileFormat == .epub {
-                attrStr = try loadEPUBText(url: url)
+
+    private var bottomNavigationBar: some View {
+        HStack(spacing: 12) {
+            Button(action: { controller.perform(.previousPage) }) {
+                Image(systemName: "chevron.left")
+                    .font(.headline)
+            }
+            .disabled(controller.currentPageIndex <= 0)
+            .help("Previous Page")
+
+            if controller.pageCount > 1 {
+                Slider(
+                    value: Binding(
+                        get: { Double(controller.currentPageIndex) },
+                        set: { controller.perform(.goToPage(Int($0))) }
+                    ),
+                    in: 0...Double(controller.pageCount - 1),
+                    step: 1
+                )
+                .tint(.accentBrown)
             } else {
-                let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
-                    .documentType: (book.fileFormat == .html ? NSAttributedString.DocumentType.html :
-                                   book.fileFormat == .rtf ? NSAttributedString.DocumentType.rtf : NSAttributedString.DocumentType.plain)
-                ]
-                attrStr = try NSAttributedString(url: url, options: options, documentAttributes: nil)
+                Spacer()
             }
-            
-            let textView = NSTextView(frame: NSRect(x: 0, y: 0, width: 600, height: 800))
-            textView.textStorage?.setAttributedString(attrStr)
-            
-            let printInfo = NSPrintInfo.shared
-            printInfo.paperSize = NSSize(width: 600, height: 800)
-            printInfo.topMargin = 40
-            printInfo.bottomMargin = 40
-            printInfo.leftMargin = 40
-            printInfo.rightMargin = 40
-            
-            let printOp = NSPrintOperation(view: textView, printInfo: printInfo)
-            printOp.showsPrintPanel = false
-            printOp.showsProgressPanel = false
-            
-            let pdfData = textView.dataWithPDF(inside: textView.bounds)
-            return PDFDocument(data: pdfData)
-        } catch {
-            print("Error loading text document: \(error)")
-            return nil
+
+            Button(action: { controller.perform(.nextPage) }) {
+                Image(systemName: "chevron.right")
+                    .font(.headline)
+            }
+            .disabled(controller.currentPageIndex >= max(0, controller.pageCount - 1))
+            .help("Next Page")
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Color.warmCream)
+        .overlay(
+            Rectangle().frame(height: 1).foregroundColor(Color.primary.opacity(0.1)),
+            alignment: .top
+        )
+    }
+
+    private var pageIndicatorButton: some View {
+        Button(action: {
+            goToPageText = "\(controller.currentPageIndex + 1)"
+            goToPageError = nil
+            showGoToPage = true
+        }) {
+            Text(controller.hasActiveDocument ? "Page \(controller.currentPageIndex + 1) of \(controller.pageCount)" : "No Document")
+                .font(.caption.weight(.semibold).monospacedDigit())
+                .foregroundColor(Color.textPrimary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.primary.opacity(0.08))
+                .cornerRadius(6)
+        }
+        .buttonStyle(.plain)
+        .disabled(!controller.hasActiveDocument)
+        .popover(isPresented: $showGoToPage) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Go to Page")
+                    .font(.headline)
+                HStack {
+                    TextField("Page", text: $goToPageText)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 80)
+                        .onChange(of: goToPageText) { _ in
+                            goToPageError = nil
+                        }
+                        .onSubmit {
+                            submitGoToPage()
+                        }
+                    Text("of \(controller.pageCount)")
+                        .foregroundColor(Color.textSecondary)
+                }
+
+                if let error = goToPageError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                HStack(spacing: 12) {
+                    Spacer()
+                    Button("Cancel") { showGoToPage = false }
+                    Button("Go") { submitGoToPage() }
+                        .keyboardShortcut(.return)
+                        .buttonStyle(.borderedProminent)
+                        .tint(.accentBrown)
+                }
+            }
+            .padding(16)
+            .frame(width: 240)
         }
     }
-    
-    private func loadEPUBText(url: URL) throws -> NSAttributedString {
-        // Try reading EPUB container or extracting HTML files from ZIP archive
-        let fm = FileManager.default
-        let tempDir = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
-        process.arguments = ["-q", url.path, "-d", tempDir.path]
-        try process.run()
-        process.waitUntilExit()
-        
-        // Find HTML files inside extracted EPUB
-        let enumerator = fm.enumerator(at: tempDir, includingPropertiesForKeys: nil)
-        var fullHTML = "<html><head><style>body { font-family: -apple-system, sans-serif; font-size: 15px; line-height: 1.6; color: #2C2C2A; padding: 20px; }</style></head><body>"
-        
-        var htmlFiles: [URL] = []
-        while let fileURL = enumerator?.nextObject() as? URL {
-            let ext = fileURL.pathExtension.lowercased()
-            if ext == "html" || ext == "xhtml" || ext == "htm" {
-                htmlFiles.append(fileURL)
-            }
-        }
-        
-        htmlFiles.sort { $0.path < $1.path }
-        
-        for htmlURL in htmlFiles {
-            if let str = try? String(contentsOf: htmlURL, encoding: .utf8) {
-                // Strip <html> and <body> tags to concatenate cleanly
-                var bodyContent = str
-                if let bodyRange = str.range(of: "<body[^>]*>", options: .regularExpression) {
-                    bodyContent = String(str[bodyRange.upperBound...])
+
+    private var zoomMenu: some View {
+        Menu {
+            Button(action: { controller.perform(.fitToPage) }) {
+                if controller.zoomMode == .fitPage {
+                    Label("Fit Page to Window", systemImage: "checkmark")
+                } else {
+                    Text("Fit Page to Window")
                 }
-                if let endBodyRange = bodyContent.range(of: "</body>") {
-                    bodyContent = String(bodyContent[..<endBodyRange.lowerBound])
+            }
+            Button(action: { controller.perform(.fitToWidth) }) {
+                if controller.zoomMode == .fitWidth {
+                    Label("Fit Page to Width", systemImage: "checkmark")
+                } else {
+                    Text("Fit Page to Width")
                 }
-                fullHTML += bodyContent + "<hr/>"
             }
-        }
-        
-        fullHTML += "</body></html>"
-        
-        if let data = fullHTML.data(using: .utf8) {
-            let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
-                .documentType: NSAttributedString.DocumentType.html,
-                .characterEncoding: String.Encoding.utf8.rawValue
-            ]
-            if let attrStr = try? NSAttributedString(data: data, options: options, documentAttributes: nil) {
-                return attrStr
+            Divider()
+            ForEach([0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0], id: \.self) { preset in
+                Button("\(Int(preset * 100))%\(preset == 1.0 ? " (Actual Size)" : "")") {
+                    controller.perform(.zoomPreset(preset))
+                }
             }
+        } label: {
+            HStack(spacing: 3) {
+                Text(zoomLabel)
+                    .font(.caption.weight(.semibold).monospacedDigit())
+                    .foregroundColor(Color.textPrimary)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8))
+                    .foregroundColor(Color.textPrimary)
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(Color.primary.opacity(0.08))
+            .cornerRadius(4)
         }
-        
-        return NSAttributedString(string: "Failed to parse EPUB content.")
+        .buttonStyle(.plain)
+        .disabled(!controller.hasActiveDocument)
+        .help("Zoom Options")
+    }
+
+    private var zoomLabel: String {
+        let percent = Int((controller.effectiveScaleFactor * 100).rounded())
+        switch controller.zoomMode {
+        case .fitPage:
+            return "Fit (\(percent)%)"
+        case .fitWidth:
+            return "Width (\(percent)%)"
+        case .manual:
+            return "\(percent)%"
+        }
+    }
+
+    private func submitGoToPage() {
+        let trimmed = goToPageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let page = Int(trimmed), page >= 1, page <= controller.pageCount else {
+            goToPageError = "Enter a page number from 1 to \(max(1, controller.pageCount))."
+            return
+        }
+        controller.perform(.goToPage(page - 1))
+        showGoToPage = false
+        controller.focusPDFView()
+    }
+
+    private func iconName(for error: DocumentLoadError) -> String {
+        switch error {
+        case .fileNotFound:
+            return "doc.questionmark"
+        case .passwordProtected:
+            return "lock.doc"
+        case .unreadable:
+            return "hand.raised"
+        case .corruptDocument, .unsupportedFormat:
+            return "exclamationmark.triangle"
+        }
     }
 }
